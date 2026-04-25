@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ハルログ">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#fbf7ed">
+  <meta name="description" content="1時間ごとにやったことだけを軽く残す、個人用の時間ログアプリです。">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <title>ハルログ｜いまなにしてる？</title>
+  <style>
+    :root {
+      --paper: #fffdf7;
+      --cream: #fbf7ed;
+      --ink: #2f2a24;
+      --muted: #756d62;
+      --line: #e8dcc9;
+      --field: #fffaf1;
+      --accent: #8b6f47;
+      --accent-dark: #6f5633;
+      --shadow: 0 1px 0 rgba(86, 67, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--cream);
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(251, 247, 237, 0.95)),
+        var(--cream);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .app {
+      width: min(100%, 720px);
+      margin: 0 auto;
+      padding: max(22px, env(safe-area-inset-top)) 18px max(30px, env(safe-area-inset-bottom));
+    }
+
+    header {
+      padding: 10px 2px 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .today {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      margin-top: 16px;
+      padding: 4px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 253, 247, 0.76);
+      color: var(--accent-dark);
+      font-size: 15px;
+      box-shadow: var(--shadow);
+    }
+
+    main {
+      display: grid;
+      gap: 18px;
+      padding-bottom: 8px;
+    }
+
+    section {
+      padding: 0;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .field-group,
+    .hour-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--field);
+      color: var(--ink);
+      font: inherit;
+      box-shadow: var(--shadow);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input {
+      min-height: 50px;
+      padding: 12px 13px;
+    }
+
+    textarea {
+      min-height: 86px;
+      padding: 12px 13px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #c5a778;
+      background: #fffdf8;
+      box-shadow: 0 0 0 3px rgba(197, 167, 120, 0.22);
+    }
+
+    .hour-row {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 10px;
+      align-items: start;
+      scroll-margin-bottom: 90px;
+    }
+
+    .hour {
+      padding-top: 11px;
+      color: var(--accent-dark);
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      margin: 4px -18px 0;
+      padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(251, 247, 237, 0), rgba(251, 247, 237, 0.96) 22%, var(--cream));
+    }
+
+    button {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fffdf8;
+      font: inherit;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(71, 52, 26, 0.18);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      background: var(--accent-dark);
+    }
+
+    .message {
+      min-height: 24px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 380px) {
+      .app {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .hour-row {
+        grid-template-columns: 56px 1fr;
+        gap: 8px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>ハルログ</h1>
+      <p class="subtitle">いまなにしてる？</p>
+      <div class="today" id="todayText" aria-live="polite"></div>
+    </header>
+
+    <main>
+      <section aria-labelledby="dayTitle">
+        <h2 class="section-title" id="dayTitle">今日の入り口</h2>
+        <div class="field-group">
+          <label>
+            起床
+            <input id="wake" type="text" autocomplete="off" placeholder="例：8:20">
+          </label>
+          <label>
+            ボディバッテリー
+            <input id="battery" type="text" autocomplete="off" placeholder="例：42">
+          </label>
+          <label>
+            今日の予定
+            <textarea id="plan" placeholder="今日ありそうなことを軽く"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section aria-labelledby="logTitle">
+        <h2 class="section-title" id="logTitle">1時間ごとの観察メモ</h2>
+        <div class="hour-list" id="hourList"></div>
+      </section>
+
+      <div class="actions">
+        <button id="copyButton" type="button">ログをコピー</button>
+        <p class="message" id="message" aria-live="polite"></p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const hours = Array.from({ length: 16 }, (_, index) => index + 7);
+      const fields = ["wake", "battery", "plan"];
+      const today = new Date();
+      const dateKey = formatDate(today, "-");
+      const storageKey = `halulog:${dateKey}`;
+      const todayLabel = formatDate(today, "/");
+      const hourList = document.getElementById("hourList");
+      const message = document.getElementById("message");
+
+      document.getElementById("todayText").textContent = `今日：${todayLabel}`;
+
+      // 時間ごとの入力欄を作る
+      hours.forEach((hour) => {
+        const row = document.createElement("div");
+        row.className = "hour-row";
+
+        const time = document.createElement("div");
+        time.className = "hour";
+        time.textContent = `${hour}:00`;
+
+        const textarea = document.createElement("textarea");
+        textarea.id = `hour-${hour}`;
+        textarea.dataset.hour = String(hour);
+        textarea.setAttribute("aria-label", `${hour}:00 のメモ`);
+        textarea.placeholder = "やったことだけ";
+
+        row.append(time, textarea);
+        hourList.append(row);
+      });
+
+      const data = loadData();
+      restoreData(data);
+
+      // 入力したら日付ごとに自動保存
+      document.addEventListener("input", (event) => {
+        if (event.target.matches("input, textarea")) {
+          const saved = saveData();
+          showMessage(saved ? "保存しました" : "保存できませんでした", 900);
+        }
+      });
+
+      document.getElementById("copyButton").addEventListener("click", async () => {
+        const text = buildCopyText();
+
+        try {
+          await copyText(text);
+          showMessage("コピーしました");
+        } catch (error) {
+          showMessage("コピーできませんでした。本文を選んでコピーしてください。");
+        }
+      });
+
+      function formatDate(date, separator) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}${separator}${month}${separator}${day}`;
+      }
+
+      function loadData() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey)) || {};
+        } catch (error) {
+          return {};
+        }
+      }
+
+      function restoreData(saved) {
+        fields.forEach((id) => {
+          document.getElementById(id).value = saved[id] || "";
+        });
+
+        hours.forEach((hour) => {
+          document.getElementById(`hour-${hour}`).value = saved.logs?.[hour] || "";
+        });
+      }
+
+      function collectData() {
+        const logs = {};
+        hours.forEach((hour) => {
+          logs[hour] = document.getElementById(`hour-${hour}`).value;
+        });
+
+        return {
+          wake: document.getElementById("wake").value,
+          battery: document.getElementById("battery").value,
+          plan: document.getElementById("plan").value,
+          logs
+        };
+      }
+
+      function saveData() {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(collectData()));
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function buildCopyText() {
+        const current = collectData();
+        const lines = [
+          "【ハルログ】",
+          `今日：${todayLabel}`,
+          `起床：${current.wake}`,
+          `ボディバッテリー：${current.battery}`,
+          `今日の予定：${current.plan}`,
+          ""
+        ];
+
+        hours.forEach((hour) => {
+          lines.push(`${hour}:00　${current.logs[hour]}`);
+        });
+
+        return lines.join("\n");
+      }
+
+      async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return;
+          } catch (error) {
+            // Safariで許可されない時は下の方法を試す
+          }
+        }
+
+        // 古い環境やfile表示向けのコピー処理
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.setAttribute("readonly", "");
+        helper.style.fontSize = "16px";
+        helper.style.position = "fixed";
+        helper.style.top = "0";
+        helper.style.left = "0";
+        helper.style.width = "1px";
+        helper.style.height = "1px";
+        helper.style.opacity = "0.01";
+        document.body.append(helper);
+        helper.focus();
+        helper.select();
+        helper.setSelectionRange(0, helper.value.length);
+        const copied = document.execCommand("copy");
+        helper.remove();
+
+        if (!copied) {
+          throw new Error("Copy failed");
+        }
+      }
+
+      function showMessage(text, duration = 1800) {
+        message.textContent = text;
+        window.clearTimeout(showMessage.timer);
+        showMessage.timer = window.setTimeout(() => {
+          message.textContent = "";
+        }, duration);
+      }
+    })();
+  </script>
+</body>
+</html>
