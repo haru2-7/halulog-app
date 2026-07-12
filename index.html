@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-title" content="ハルログ">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#fbf7ed">
-  <meta name="description" content="1時間ごとにやったことだけを軽く残す、個人用の時間ログアプリです。">
+  <meta name="description" content="一日を4時間ずつの小さな区画に分けて予定と記録を残す、個人用の時間ログアプリです。">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -101,6 +101,7 @@
     }
 
     .field-group,
+    .day-list,
     .hour-list {
       display: grid;
       gap: 12px;
@@ -144,6 +145,46 @@
       border-color: #c5a778;
       background: #fffdf8;
       box-shadow: 0 0 0 3px rgba(197, 167, 120, 0.22);
+    }
+
+    .section-note {
+      margin: -2px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .day-card {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 253, 247, 0.72);
+      box-shadow: var(--shadow);
+    }
+
+    .day-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .day-number {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .day-time {
+      color: var(--accent-dark);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .day-card textarea {
+      min-height: 76px;
+      background: var(--paper);
     }
 
     .hour-row {
@@ -242,6 +283,12 @@
         </div>
       </section>
 
+      <section aria-labelledby="dayPlanTitle">
+        <h2 class="section-title" id="dayPlanTitle">4つの小さな一日</h2>
+        <p class="section-note">起床の1時間後から4時間ずつ。ひと区画うまくいかなくても、次から再開。</p>
+        <div class="day-list" id="dayList"></div>
+      </section>
+
       <section aria-labelledby="logTitle">
         <h2 class="section-title" id="logTitle">1時間ごとの観察メモ</h2>
         <div class="hour-list" id="hourList"></div>
@@ -257,15 +304,46 @@
   <script>
     (() => {
       const hours = Array.from({ length: 16 }, (_, index) => index + 7);
+      const dayPlans = Array.from({ length: 4 }, (_, index) => index);
       const fields = ["wake", "battery", "plan"];
       const today = new Date();
       const dateKey = formatDate(today, "-");
       const storageKey = `halulog:${dateKey}`;
       const todayLabel = formatDate(today, "/");
+      const dayList = document.getElementById("dayList");
       const hourList = document.getElementById("hourList");
       const message = document.getElementById("message");
 
       document.getElementById("todayText").textContent = `今日：${todayLabel}`;
+
+      // 起床の1時間後から、4時間ずつの「小さな一日」を作る
+      dayPlans.forEach((index) => {
+        const card = document.createElement("div");
+        card.className = "day-card";
+
+        const heading = document.createElement("div");
+        heading.className = "day-heading";
+
+        const number = document.createElement("div");
+        number.className = "day-number";
+        number.textContent = `第${index + 1}日`;
+
+        const time = document.createElement("div");
+        time.className = "day-time";
+        time.id = `day-time-${index}`;
+
+        const textarea = document.createElement("textarea");
+        textarea.id = `day-plan-${index}`;
+        textarea.dataset.dayPlan = String(index);
+        textarea.setAttribute("aria-label", `第${index + 1}日の予定`);
+        textarea.placeholder = "この4時間の主目的をひとつ";
+
+        heading.append(number, time);
+        card.append(heading, textarea);
+        dayList.append(card);
+      });
+
+      updateDayTimes();
 
       // 時間ごとの入力欄を作る
       hours.forEach((hour) => {
@@ -291,6 +369,10 @@
 
       // 入力したら日付ごとに自動保存
       document.addEventListener("input", (event) => {
+        if (event.target.id === "wake") {
+          updateDayTimes();
+        }
+
         if (event.target.matches("input, textarea")) {
           const saved = saveData();
           showMessage(saved ? "保存しました" : "保存できませんでした", 900);
@@ -328,12 +410,23 @@
           document.getElementById(id).value = saved[id] || "";
         });
 
+        dayPlans.forEach((index) => {
+          document.getElementById(`day-plan-${index}`).value = saved.dayPlans?.[index] || "";
+        });
+
         hours.forEach((hour) => {
           document.getElementById(`hour-${hour}`).value = saved.logs?.[hour] || "";
         });
+
+        updateDayTimes();
       }
 
       function collectData() {
+        const plannedDays = {};
+        dayPlans.forEach((index) => {
+          plannedDays[index] = document.getElementById(`day-plan-${index}`).value;
+        });
+
         const logs = {};
         hours.forEach((hour) => {
           logs[hour] = document.getElementById(`hour-${hour}`).value;
@@ -343,6 +436,7 @@
           wake: document.getElementById("wake").value,
           battery: document.getElementById("battery").value,
           plan: document.getElementById("plan").value,
+          dayPlans: plannedDays,
           logs
         };
       }
@@ -364,14 +458,53 @@
           `起床：${current.wake}`,
           `ボディバッテリー：${current.battery}`,
           `今日の予定：${current.plan}`,
-          ""
+          "",
+          "【4つの小さな一日】"
         ];
+
+        dayPlans.forEach((index) => {
+          lines.push(`第${index + 1}日（${getDayTimeLabel(index)}）　${current.dayPlans[index]}`);
+        });
+
+        lines.push("", "【1時間ごとの観察メモ】");
 
         hours.forEach((hour) => {
           lines.push(`${hour}:00　${current.logs[hour]}`);
         });
 
         return lines.join("\n");
+      }
+
+      function updateDayTimes() {
+        dayPlans.forEach((index) => {
+          document.getElementById(`day-time-${index}`).textContent = getDayTimeLabel(index);
+        });
+      }
+
+      function getDayTimeLabel(index) {
+        const wakeMinutes = parseTime(document.getElementById("wake").value);
+        const firstStart = (wakeMinutes ?? 390) + 60;
+        const start = firstStart + index * 240;
+        const end = start + 240;
+        return `${formatClock(start)}〜${formatClock(end)}`;
+      }
+
+      function parseTime(value) {
+        const match = String(value).trim().match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) return null;
+
+        const hour = Number(match[1]);
+        const minute = Number(match[2]);
+        if (hour > 23 || minute > 59) return null;
+        return hour * 60 + minute;
+      }
+
+      function formatClock(totalMinutes) {
+        const dayOffset = Math.floor(totalMinutes / 1440);
+        const normalized = ((totalMinutes % 1440) + 1440) % 1440;
+        const hour = Math.floor(normalized / 60);
+        const minute = String(normalized % 60).padStart(2, "0");
+        return `${dayOffset > 0 ? "翌 " : ""}${hour}:${minute}`;
       }
 
       async function copyText(text) {
@@ -418,3 +551,4 @@
   </script>
 </body>
 </html>
+
