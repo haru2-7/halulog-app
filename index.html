@@ -22,12 +22,11 @@
       --field: #fffaf1;
       --accent: #8b6f47;
       --accent-dark: #6f5633;
+      --accent-soft: #f1e6d4;
       --shadow: 0 1px 0 rgba(86, 67, 40, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html {
       min-height: 100%;
@@ -52,15 +51,12 @@
       padding: max(22px, env(safe-area-inset-top)) 18px max(30px, env(safe-area-inset-bottom));
     }
 
-    header {
-      padding: 10px 2px 18px;
-    }
+    header { padding: 10px 2px 18px; }
 
     h1 {
       margin: 0;
       font-size: 26px;
       font-weight: 700;
-      letter-spacing: 0;
     }
 
     .subtitle {
@@ -89,15 +85,19 @@
       padding-bottom: 8px;
     }
 
-    section {
-      padding: 0;
-    }
+    section { padding: 0; }
 
     .section-title {
       margin: 0 0 8px;
       color: var(--muted);
       font-size: 14px;
       font-weight: 700;
+    }
+
+    .section-note {
+      margin: -2px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .field-group,
@@ -147,12 +147,6 @@
       box-shadow: 0 0 0 3px rgba(197, 167, 120, 0.22);
     }
 
-    .section-note {
-      margin: -2px 0 10px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
     .day-card {
       padding: 13px;
       border: 1px solid var(--line);
@@ -187,6 +181,201 @@
       background: var(--paper);
     }
 
+    .review-card,
+    .hour-details {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 253, 247, 0.82);
+      box-shadow: var(--shadow);
+    }
+
+    .review-card > summary,
+    .hour-details > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+      padding: 12px 14px;
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .review-card > summary::-webkit-details-marker,
+    .hour-details > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-main {
+      display: grid;
+      gap: 1px;
+    }
+
+    .summary-date,
+    .summary-status,
+    .detail-hint {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .summary-status {
+      color: var(--accent-dark);
+      white-space: nowrap;
+    }
+
+    .review-body {
+      display: grid;
+      gap: 16px;
+      padding: 0 14px 15px;
+      border-top: 1px solid rgba(232, 220, 201, 0.78);
+    }
+
+    .previous-plan {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 9px;
+      background: var(--accent-soft);
+    }
+
+    .previous-plan-title {
+      margin: 0 0 5px;
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .previous-plan-list {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding-left: 1.2em;
+      font-size: 14px;
+    }
+
+    .previous-plan-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .choice {
+      position: relative;
+      display: block;
+      font-weight: 600;
+    }
+
+    .choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 9px 8px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 14px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .choice input:focus-visible + span {
+      box-shadow: 0 0 0 3px rgba(197, 167, 120, 0.22);
+    }
+
+    .choice input:checked + span {
+      border-color: #b99661;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    .review-note input {
+      background: var(--paper);
+    }
+
+    .review-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    button {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fffdf8;
+      font: inherit;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(71, 52, 26, 0.18);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      background: var(--accent-dark);
+    }
+
+    .secondary-button {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      box-shadow: none;
+      font-size: 14px;
+    }
+
+    .secondary-button:active {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+    }
+
+    .hour-details[open] > summary {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hour-details .hour-list {
+      padding: 13px;
+    }
+
     .hour-row {
       display: grid;
       grid-template-columns: 62px 1fr;
@@ -212,25 +401,6 @@
       background: linear-gradient(180deg, rgba(251, 247, 237, 0), rgba(251, 247, 237, 0.96) 22%, var(--cream));
     }
 
-    button {
-      width: 100%;
-      min-height: 52px;
-      border: 0;
-      border-radius: 8px;
-      background: var(--accent);
-      color: #fffdf8;
-      font: inherit;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(71, 52, 26, 0.18);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:active {
-      transform: translateY(1px);
-      background: var(--accent-dark);
-    }
-
     .message {
       min-height: 24px;
       margin: 8px 0 0;
@@ -238,6 +408,8 @@
       font-size: 14px;
       text-align: center;
     }
+
+    [hidden] { display: none !important; }
 
     @media (max-width: 380px) {
       .app {
@@ -250,9 +422,7 @@
         gap: 8px;
       }
 
-      h1 {
-        font-size: 24px;
-      }
+      h1 { font-size: 24px; }
     }
   </style>
 </head>
@@ -265,7 +435,84 @@
     </header>
 
     <main>
-      <section aria-labelledby="dayTitle">
+      <section id="yesterdaySection" hidden aria-labelledby="yesterdayTitle">
+        <details class="review-card" id="yesterdayReview">
+          <summary>
+            <span class="summary-main">
+              <span id="yesterdayTitle">昨日どうだった？</span>
+              <span class="summary-date" id="yesterdayDateText"></span>
+            </span>
+            <span class="summary-status" id="reviewStatus">30秒で振り返り</span>
+          </summary>
+
+          <div class="review-body">
+            <div class="previous-plan">
+              <p class="previous-plan-title">昨日の予定</p>
+              <div id="previousPlanContent"></div>
+            </div>
+
+            <fieldset>
+              <legend>進み具合</legend>
+              <div class="choice-grid">
+                <label class="choice">
+                  <input type="radio" name="reviewResult" value="予定どおり">
+                  <span>予定どおり</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewResult" value="少し進んだ">
+                  <span>少し進んだ</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewResult" value="ほぼ進まず">
+                  <span>ほぼ進まず</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewResult" value="休んだ">
+                  <span>休んだ</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>作業時間</legend>
+              <div class="choice-grid">
+                <label class="choice">
+                  <input type="radio" name="reviewDuration" value="〜2h">
+                  <span>〜2h</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewDuration" value="2〜4h">
+                  <span>2〜4h</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewDuration" value="4〜6h">
+                  <span>4〜6h</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewDuration" value="6〜8h">
+                  <span>6〜8h</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="reviewDuration" value="8h〜">
+                  <span>8h〜</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <label class="review-note">
+              ひとこと <span class="detail-hint">任意</span>
+              <input id="reviewNote" type="text" autocomplete="off" placeholder="例：19pまで修正／資料探しで詰まった">
+            </label>
+
+            <div class="review-actions">
+              <button id="completeReviewButton" type="button">昨日を記録して今日へ</button>
+              <button class="secondary-button" id="skipReviewButton" type="button">今日はスキップ</button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section id="todayStart" aria-labelledby="dayTitle">
         <h2 class="section-title" id="dayTitle">今日の入り口</h2>
         <div class="field-group">
           <label>
@@ -274,7 +521,7 @@
           </label>
           <label>
             ボディバッテリー
-            <input id="battery" type="text" autocomplete="off" placeholder="例：42">
+            <input id="battery" type="text" inputmode="numeric" autocomplete="off" placeholder="例：42">
           </label>
           <label>
             今日の予定
@@ -290,8 +537,13 @@
       </section>
 
       <section aria-labelledby="logTitle">
-        <h2 class="section-title" id="logTitle">1時間ごとの観察メモ</h2>
-        <div class="hour-list" id="hourList"></div>
+        <details class="hour-details">
+          <summary>
+            <span id="logTitle">1時間ごとの観察メモ</span>
+            <span class="detail-hint">必要な日だけ</span>
+          </summary>
+          <div class="hour-list" id="hourList"></div>
+        </details>
       </section>
 
       <div class="actions">
@@ -307,16 +559,27 @@
       const dayPlans = Array.from({ length: 4 }, (_, index) => index);
       const fields = ["wake", "battery", "plan"];
       const today = new Date();
+      const previousDate = new Date(today);
+      previousDate.setDate(previousDate.getDate() - 1);
+
       const dateKey = formatDate(today, "-");
+      const previousDateKey = formatDate(previousDate, "-");
       const storageKey = `halulog:${dateKey}`;
+      const previousStorageKey = `halulog:${previousDateKey}`;
       const todayLabel = formatDate(today, "/");
+      const previousDateLabel = formatDate(previousDate, "/");
+
       const dayList = document.getElementById("dayList");
       const hourList = document.getElementById("hourList");
       const message = document.getElementById("message");
+      const yesterdaySection = document.getElementById("yesterdaySection");
+      const yesterdayReview = document.getElementById("yesterdayReview");
+      const reviewStatus = document.getElementById("reviewStatus");
+      const previousPlanContent = document.getElementById("previousPlanContent");
 
       document.getElementById("todayText").textContent = `今日：${todayLabel}`;
+      document.getElementById("yesterdayDateText").textContent = previousDateLabel;
 
-      // 起床の1時間後から、4時間ずつの「小さな一日」を作る
       dayPlans.forEach((index) => {
         const card = document.createElement("div");
         card.className = "day-card";
@@ -343,9 +606,6 @@
         dayList.append(card);
       });
 
-      updateDayTimes();
-
-      // 時間ごとの入力欄を作る
       hours.forEach((hour) => {
         const row = document.createElement("div");
         row.className = "hour-row";
@@ -364,19 +624,31 @@
         hourList.append(row);
       });
 
-      const data = loadData();
+      const data = loadData(storageKey);
+      const previousData = loadData(previousStorageKey);
       restoreData(data);
+      setupYesterdayReview(data.yesterdayReview || {}, previousData);
 
-      // 入力したら日付ごとに自動保存
-      document.addEventListener("input", (event) => {
-        if (event.target.id === "wake") {
-          updateDayTimes();
-        }
+      document.addEventListener("input", saveFromEvent);
+      document.addEventListener("change", saveFromEvent);
 
-        if (event.target.matches("input, textarea")) {
-          const saved = saveData();
-          showMessage(saved ? "保存しました" : "保存できませんでした", 900);
-        }
+      document.getElementById("completeReviewButton").addEventListener("click", () => {
+        yesterdayReview.dataset.completed = "true";
+        yesterdayReview.dataset.skipped = "false";
+        yesterdayReview.open = false;
+        reviewStatus.textContent = "記録済み";
+        saveData();
+        document.getElementById("todayStart").scrollIntoView({ behavior: "smooth", block: "start" });
+        window.setTimeout(() => document.getElementById("wake").focus(), 350);
+      });
+
+      document.getElementById("skipReviewButton").addEventListener("click", () => {
+        yesterdayReview.dataset.completed = "true";
+        yesterdayReview.dataset.skipped = "true";
+        yesterdayReview.open = false;
+        reviewStatus.textContent = "スキップ済み";
+        saveData();
+        document.getElementById("todayStart").scrollIntoView({ behavior: "smooth", block: "start" });
       });
 
       document.getElementById("copyButton").addEventListener("click", async () => {
@@ -390,6 +662,17 @@
         }
       });
 
+      function saveFromEvent(event) {
+        if (event.target.id === "wake") {
+          updateDayTimes();
+        }
+
+        if (event.target.matches("input, textarea")) {
+          const saved = saveData();
+          showMessage(saved ? "保存しました" : "保存できませんでした", 900);
+        }
+      }
+
       function formatDate(date, separator) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -397,9 +680,9 @@
         return `${year}${separator}${month}${separator}${day}`;
       }
 
-      function loadData() {
+      function loadData(key) {
         try {
-          return JSON.parse(localStorage.getItem(storageKey)) || {};
+          return JSON.parse(localStorage.getItem(key)) || {};
         } catch (error) {
           return {};
         }
@@ -421,6 +704,83 @@
         updateDayTimes();
       }
 
+      function setupYesterdayReview(savedReview, savedPreviousData) {
+        if (!hasMeaningfulLog(savedPreviousData)) {
+          yesterdaySection.hidden = true;
+          return;
+        }
+
+        yesterdaySection.hidden = false;
+        renderPreviousPlan(savedPreviousData);
+
+        setCheckedValue("reviewResult", savedReview.result || "");
+        setCheckedValue("reviewDuration", savedReview.duration || "");
+        document.getElementById("reviewNote").value = savedReview.note || "";
+
+        const isForPreviousDate = !savedReview.previousDate || savedReview.previousDate === previousDateKey;
+        const completed = isForPreviousDate && Boolean(savedReview.completed);
+        const skipped = completed && Boolean(savedReview.skipped);
+
+        yesterdayReview.dataset.completed = String(completed);
+        yesterdayReview.dataset.skipped = String(skipped);
+        yesterdayReview.open = !completed;
+        reviewStatus.textContent = completed ? (skipped ? "スキップ済み" : "記録済み") : "30秒で振り返り";
+      }
+
+      function hasMeaningfulLog(saved) {
+        if (!saved || typeof saved !== "object") return false;
+        if ([saved.wake, saved.battery, saved.plan].some(hasText)) return true;
+        if (Object.values(saved.dayPlans || {}).some(hasText)) return true;
+        return Object.values(saved.logs || {}).some(hasText);
+      }
+
+      function hasText(value) {
+        return String(value || "").trim().length > 0;
+      }
+
+      function renderPreviousPlan(saved) {
+        previousPlanContent.replaceChildren();
+        const items = [];
+
+        if (hasText(saved.plan)) {
+          items.push(saved.plan.trim());
+        }
+
+        dayPlans.forEach((index) => {
+          const text = saved.dayPlans?.[index];
+          if (!hasText(text)) return;
+          const timeLabel = getDayTimeLabelFromWake(saved.wake, index);
+          items.push(`第${index + 1}日（${timeLabel}） ${text.trim()}`);
+        });
+
+        if (items.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "previous-plan-empty";
+          empty.textContent = "予定の記録はありません";
+          previousPlanContent.append(empty);
+          return;
+        }
+
+        const list = document.createElement("ul");
+        list.className = "previous-plan-list";
+        items.forEach((text) => {
+          const item = document.createElement("li");
+          item.textContent = text;
+          list.append(item);
+        });
+        previousPlanContent.append(list);
+      }
+
+      function setCheckedValue(name, value) {
+        document.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+          input.checked = input.value === value;
+        });
+      }
+
+      function getCheckedValue(name) {
+        return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+      }
+
       function collectData() {
         const plannedDays = {};
         dayPlans.forEach((index) => {
@@ -437,7 +797,15 @@
           battery: document.getElementById("battery").value,
           plan: document.getElementById("plan").value,
           dayPlans: plannedDays,
-          logs
+          logs,
+          yesterdayReview: {
+            previousDate: previousDateKey,
+            result: getCheckedValue("reviewResult"),
+            duration: getCheckedValue("reviewDuration"),
+            note: document.getElementById("reviewNote").value,
+            completed: yesterdayReview.dataset.completed === "true",
+            skipped: yesterdayReview.dataset.skipped === "true"
+          }
         };
       }
 
@@ -452,7 +820,21 @@
 
       function buildCopyText() {
         const current = collectData();
-        const lines = [
+        const lines = [];
+
+        if (current.yesterdayReview.completed && !current.yesterdayReview.skipped) {
+          lines.push(
+            "【昨日の振り返り】",
+            `日付：${previousDateLabel}`,
+            `昨日の予定：${previousData.plan || ""}`,
+            `進み具合：${current.yesterdayReview.result}`,
+            `作業時間：${current.yesterdayReview.duration}`,
+            `ひとこと：${current.yesterdayReview.note}`,
+            ""
+          );
+        }
+
+        lines.push(
           "【ハルログ】",
           `今日：${todayLabel}`,
           `起床：${current.wake}`,
@@ -460,7 +842,7 @@
           `今日の予定：${current.plan}`,
           "",
           "【4つの小さな一日】"
-        ];
+        );
 
         dayPlans.forEach((index) => {
           lines.push(`第${index + 1}日（${getDayTimeLabel(index)}）　${current.dayPlans[index]}`);
@@ -482,7 +864,11 @@
       }
 
       function getDayTimeLabel(index) {
-        const wakeMinutes = parseTime(document.getElementById("wake").value);
+        return getDayTimeLabelFromWake(document.getElementById("wake").value, index);
+      }
+
+      function getDayTimeLabelFromWake(wakeValue, index) {
+        const wakeMinutes = parseTime(wakeValue);
         const firstStart = (wakeMinutes ?? 390) + 60;
         const start = firstStart + index * 240;
         const end = start + 240;
@@ -517,7 +903,6 @@
           }
         }
 
-        // 古い環境やfile表示向けのコピー処理
         const helper = document.createElement("textarea");
         helper.value = text;
         helper.setAttribute("readonly", "");
@@ -551,4 +936,3 @@
   </script>
 </body>
 </html>
-
