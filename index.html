@@ -25,9 +25,7 @@
       --shadow: 0 1px 0 rgba(86, 67, 40, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html {
       min-height: 100%;
@@ -52,9 +50,7 @@
       padding: max(22px, env(safe-area-inset-top)) 18px max(30px, env(safe-area-inset-bottom));
     }
 
-    header {
-      padding: 10px 2px 18px;
-    }
+    header { padding: 10px 2px 18px; }
 
     h1 {
       margin: 0;
@@ -89,9 +85,7 @@
       padding-bottom: 8px;
     }
 
-    section {
-      padding: 0;
-    }
+    section { padding: 0; }
 
     .section-title {
       margin: 0 0 8px;
@@ -100,9 +94,16 @@
       font-weight: 700;
     }
 
+    .section-note {
+      margin: -2px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .field-group,
     .day-list,
-    .hour-list {
+    .hour-list,
+    .work-fields {
       display: grid;
       gap: 12px;
     }
@@ -116,7 +117,8 @@
     }
 
     input,
-    textarea {
+    textarea,
+    select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -129,9 +131,22 @@
       appearance: none;
     }
 
-    input {
+    input,
+    select {
       min-height: 50px;
       padding: 12px 13px;
+    }
+
+    select {
+      padding-right: 38px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent-dark) 50%),
+        linear-gradient(135deg, var(--accent-dark) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 22px,
+        calc(100% - 13px) 22px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
     }
 
     textarea {
@@ -141,19 +156,15 @@
     }
 
     input:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       border-color: #c5a778;
-      background: #fffdf8;
+      background-color: #fffdf8;
       box-shadow: 0 0 0 3px rgba(197, 167, 120, 0.22);
     }
 
-    .section-note {
-      margin: -2px 0 10px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .day-card {
+    .day-card,
+    .work-card {
       padding: 13px;
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -185,6 +196,28 @@
     .day-card textarea {
       min-height: 76px;
       background: var(--paper);
+    }
+
+    .work-card {
+      padding: 14px;
+      background: rgba(255, 253, 247, 0.82);
+    }
+
+    .work-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .work-fields textarea {
+      min-height: 72px;
+      background: var(--paper);
+    }
+
+    .optional {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
     }
 
     .hour-row {
@@ -239,6 +272,10 @@
       text-align: center;
     }
 
+    @media (max-width: 520px) {
+      .work-grid { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 380px) {
       .app {
         padding-left: 14px;
@@ -250,9 +287,7 @@
         gap: 8px;
       }
 
-      h1 {
-        font-size: 24px;
-      }
+      h1 { font-size: 24px; }
     }
   </style>
 </head>
@@ -274,7 +309,7 @@
           </label>
           <label>
             ボディバッテリー
-            <input id="battery" type="text" autocomplete="off" placeholder="例：42">
+            <input id="battery" type="text" inputmode="numeric" autocomplete="off" placeholder="例：42">
           </label>
           <label>
             今日の予定
@@ -287,6 +322,50 @@
         <h2 class="section-title" id="dayPlanTitle">4つの小さな一日</h2>
         <p class="section-note">起床の1時間後から4時間ずつ。ひと区画うまくいかなくても、次から再開。</p>
         <div class="day-list" id="dayList"></div>
+      </section>
+
+      <section aria-labelledby="workTitle">
+        <h2 class="section-title" id="workTitle">今日の制作</h2>
+        <p class="section-note">あとから制作日数を数えるための、ざっくり記録。空欄があっても大丈夫。</p>
+        <div class="work-card">
+          <div class="work-fields">
+            <div class="work-grid">
+              <label>
+                作品・話数
+                <input id="workTitleInput" type="text" autocomplete="off" placeholder="例：毒草館 第1話">
+              </label>
+              <label>
+                工程
+                <select id="workStage">
+                  <option value="">選ばなくてもOK</option>
+                  <option>プロット</option>
+                  <option>場面分解</option>
+                  <option>ミニネーム</option>
+                  <option>清書ネーム</option>
+                  <option>ネーム修正</option>
+                  <option>作画</option>
+                  <option>資料・準備</option>
+                  <option>その他</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              実働
+              <input id="workTime" type="text" autocomplete="off" placeholder="例：5.5hくらい／午前3h＋午後2h">
+            </label>
+
+            <label>
+              進んだところ
+              <textarea id="workProgress" placeholder="例：8〜19pを修正／場面分解を6つ"></textarea>
+            </label>
+
+            <label>
+              詰まり・割り込み <span class="optional">任意</span>
+              <textarea id="workBlockers" placeholder="例：構造迷子、資料探し、体調、編集待ち"></textarea>
+            </label>
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="logTitle">
@@ -306,6 +385,7 @@
       const hours = Array.from({ length: 16 }, (_, index) => index + 7);
       const dayPlans = Array.from({ length: 4 }, (_, index) => index);
       const fields = ["wake", "battery", "plan"];
+      const workFields = ["workTitleInput", "workStage", "workTime", "workProgress", "workBlockers"];
       const today = new Date();
       const dateKey = formatDate(today, "-");
       const storageKey = `halulog:${dateKey}`;
@@ -316,7 +396,6 @@
 
       document.getElementById("todayText").textContent = `今日：${todayLabel}`;
 
-      // 起床の1時間後から、4時間ずつの「小さな一日」を作る
       dayPlans.forEach((index) => {
         const card = document.createElement("div");
         card.className = "day-card";
@@ -345,7 +424,6 @@
 
       updateDayTimes();
 
-      // 時間ごとの入力欄を作る
       hours.forEach((hour) => {
         const row = document.createElement("div");
         row.className = "hour-row";
@@ -367,17 +445,19 @@
       const data = loadData();
       restoreData(data);
 
-      // 入力したら日付ごとに自動保存
-      document.addEventListener("input", (event) => {
+      const saveFromEvent = (event) => {
         if (event.target.id === "wake") {
           updateDayTimes();
         }
 
-        if (event.target.matches("input, textarea")) {
+        if (event.target.matches("input, textarea, select")) {
           const saved = saveData();
           showMessage(saved ? "保存しました" : "保存できませんでした", 900);
         }
-      });
+      };
+
+      document.addEventListener("input", saveFromEvent);
+      document.addEventListener("change", saveFromEvent);
 
       document.getElementById("copyButton").addEventListener("click", async () => {
         const text = buildCopyText();
@@ -410,6 +490,10 @@
           document.getElementById(id).value = saved[id] || "";
         });
 
+        workFields.forEach((id) => {
+          document.getElementById(id).value = saved.work?.[id] || "";
+        });
+
         dayPlans.forEach((index) => {
           document.getElementById(`day-plan-${index}`).value = saved.dayPlans?.[index] || "";
         });
@@ -432,11 +516,17 @@
           logs[hour] = document.getElementById(`hour-${hour}`).value;
         });
 
+        const work = {};
+        workFields.forEach((id) => {
+          work[id] = document.getElementById(id).value;
+        });
+
         return {
           wake: document.getElementById("wake").value,
           battery: document.getElementById("battery").value,
           plan: document.getElementById("plan").value,
           dayPlans: plannedDays,
+          work,
           logs
         };
       }
@@ -465,6 +555,21 @@
         dayPlans.forEach((index) => {
           lines.push(`第${index + 1}日（${getDayTimeLabel(index)}）　${current.dayPlans[index]}`);
         });
+
+        const work = current.work;
+        const hasWorkData = workFields.some((id) => String(work[id] || "").trim());
+
+        if (hasWorkData) {
+          lines.push(
+            "",
+            "【制作実績】",
+            `作品・話数：${work.workTitleInput}`,
+            `工程：${work.workStage}`,
+            `実働：${work.workTime}`,
+            `進捗：${work.workProgress}`,
+            `詰まり・割り込み：${work.workBlockers}`
+          );
+        }
 
         lines.push("", "【1時間ごとの観察メモ】");
 
@@ -517,7 +622,6 @@
           }
         }
 
-        // 古い環境やfile表示向けのコピー処理
         const helper = document.createElement("textarea");
         helper.value = text;
         helper.setAttribute("readonly", "");
@@ -551,4 +655,3 @@
   </script>
 </body>
 </html>
-
