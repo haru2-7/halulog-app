@@ -1,6 +1,7 @@
 (() => {
       const hours = Array.from({ length: 16 }, (_, index) => index + 7);
       const dayPlans = Array.from({ length: 4 }, (_, index) => index);
+      const dayTimeLabels = ["8:00〜12:00", "12:00〜15:00", "15:00〜18:00", "18:00〜22:00"];
       const fields = ["wake", "battery", "plan"];
       const scheduleFields = ["scheduleWants", "scheduleMusts", "scheduleFixed", "scheduleDraft"];
       const today = new Date();
@@ -45,7 +46,7 @@
         textarea.id = `day-plan-${index}`;
         textarea.dataset.dayPlan = String(index);
         textarea.setAttribute("aria-label", `第${index + 1}日の予定`);
-        textarea.placeholder = "この4時間の主目的をひとつ";
+        textarea.placeholder = "この時間の主目的をひとつ";
 
         heading.append(number, time);
         card.append(heading, textarea);
@@ -111,10 +112,6 @@
       });
 
       function saveFromEvent(event) {
-        if (event.target.id === "wake") {
-          updateDayTimes();
-        }
-
         if (!event.target.matches("input, textarea")) return;
 
         const saved = scheduleFields.includes(event.target.id)
@@ -222,7 +219,7 @@
         dayPlans.forEach((index) => {
           const text = saved.dayPlans?.[index];
           if (!hasText(text)) return;
-          const timeLabel = getDayTimeLabelFromWake(saved.wake, index);
+          const timeLabel = getDayTimeLabel(index);
           items.push(`第${index + 1}日（${timeLabel}） ${text.trim()}`);
         });
 
@@ -349,33 +346,7 @@
       }
 
       function getDayTimeLabel(index) {
-        return getDayTimeLabelFromWake(document.getElementById("wake").value, index);
-      }
-
-      function getDayTimeLabelFromWake(wakeValue, index) {
-        const wakeMinutes = parseTime(wakeValue);
-        const firstStart = (wakeMinutes ?? 390) + 60;
-        const start = firstStart + index * 240;
-        const end = start + 240;
-        return `${formatClock(start)}〜${formatClock(end)}`;
-      }
-
-      function parseTime(value) {
-        const match = String(value).trim().match(/^(\d{1,2}):(\d{2})$/);
-        if (!match) return null;
-
-        const hour = Number(match[1]);
-        const minute = Number(match[2]);
-        if (hour > 23 || minute > 59) return null;
-        return hour * 60 + minute;
-      }
-
-      function formatClock(totalMinutes) {
-        const dayOffset = Math.floor(totalMinutes / 1440);
-        const normalized = ((totalMinutes % 1440) + 1440) % 1440;
-        const hour = Math.floor(normalized / 60);
-        const minute = String(normalized % 60).padStart(2, "0");
-        return `${dayOffset > 0 ? "翌 " : ""}${hour}:${minute}`;
+        return dayTimeLabels[index];
       }
 
       async function copyText(text) {
