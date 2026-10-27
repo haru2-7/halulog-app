@@ -1,182 +1,474 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="ハルログ">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#fbf7ed">
-  <meta name="description" content="一日を4つの小さな区画に分けて予定と記録を残す、個人用の時間ログアプリです。">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <title>ハルログ｜いまなにしてる？</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ハルログ">
+<meta name="theme-color" content="#f6f3ec">
+<meta name="description" content="起床を起点に一日を3つか4つの小さな「日」に分ける、個人用の時間ログアプリです。">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>ハルログ｜今日は3日ある</title>
+<style>
+:root {
+--paper: #fffdf8;
+--bg: #f6f3ec;
+--ink: #33302a;
+--muted: #8a8172;
+--line: #e7ddc9;
+--lake: #5f8f87;
+--lake-dark: #43706a;
+--lake-soft: #e3efec;
+--sun: #e9b872;
+--radius: 14px;
+}
+* { box-sizing: border-box;}
+body {
+margin: 0;
+background: var(--bg);
+color: var(--ink);
+font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+font-size: 16px;
+line-height: 1.6;
+}
+.app {
+width: min(100%, 640px);
+margin: 0 auto;
+padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+}
+header { padding: 6px 2px 14px;}
+h1 { margin: 0; font-size: 24px;}
+.subtitle { margin: 2px 0 0; color: var(--muted); font-size: 14px;}
+.today {
+display: inline-block; margin-top: 12px; padding: 3px 12px;
+border: 1px solid var(--line); border-radius: 999px;
+background: var(--paper); color: var(--lake-dark); font-size: 14px;
+}
+
+.wake-card {
+background: var(--paper);
+border: 1px solid var(--line);
+border-radius: var(--radius);
+padding: 14px 16px;
+display: grid; gap: 12px;
+}
+.wake-row {
+display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.wake-row label { font-weight: 700; font-size: 15px;}
+input[type="time"] {
+font: inherit; font-size: 18px; font-weight: 700;
+border: 1px solid var(--line); border-radius: 10px;
+background: #fffaf0; color: var(--ink);
+padding: 8px 10px; min-height: 48px;
+}
+.slow-zone {
+display: flex; align-items: center; gap: 10px;
+background: #fdf3e0; border: 1px dashed var(--sun);
+border-radius: 10px; padding: 8px 12px; font-size: 14px;
+}
+.slow-zone.moon {
+width: 30px; height: 30px; flex: 0 0 auto;
+display: grid; place-items: center;
+background: #fff; border-radius: 50%; font-size: 16px;
+}
+.slow-zone small { color: var(--muted); display: block; font-size: 12px;}
+
+.mode-switch {
+display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0 6px;
+}
+.mode-switch button {
+min-height: 50px; border-radius: 12px; cursor: pointer;
+border: 1px solid var(--line); background: var(--paper);
+font: inherit; font-weight: 700; color: var(--muted);
+}
+.mode-switch button.active {
+background: var(--lake); border-color: var(--lake); color: #fff;
+}
+.mode-switch button small { display: block; font-weight: 400; font-size: 12px; opacity:.85;}
+
+.day-list { display: grid; gap: 12px; margin-top: 10px;}
+.day-card {
+background: var(--paper);
+border: 1px solid var(--line);
+border-radius: var(--radius);
+padding: 14px 16px;
+transition: opacity.2s;
+position: relative;
+overflow: hidden;
+}
+
+.stamp {
+position: absolute;
+top: 10px; right: 12px;
+width: 64px; height: 64px;
+border: 2.5px solid #d98a94;
+border-radius: 50%;
+color: #d98a94;
+display: grid; place-items: center;
+font-weight: 800; font-size: 13px; line-height: 1.25; text-align: center;
+transform: rotate(-12deg) scale(0);
+background: rgba(255, 255, 255, 0.65);
+pointer-events: none;
+}
+.day-card.done .stamp { transform: rotate(-12deg) scale(1); }
+.stamp.pop { animation: stamp-pop .45s cubic-bezier(.2, 2.2, .4, 1); }
+@keyframes stamp-pop {
+0% { transform: rotate(-30deg) scale(2.4); opacity: 0; }
+60% { transform: rotate(-12deg) scale(.92); opacity: 1; }
+100% { transform: rotate(-12deg) scale(1); opacity: 1; }
+}
+.stars-bar {
+display: flex; align-items: center; gap: 8px;
+margin-top: 12px; padding: 10px 14px;
+background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+font-size: 14px; color: var(--muted);
+}
+.stars-bar .stars { font-size: 19px; letter-spacing: 3px; color: #e5ddc9; }
+.stars-bar .stars .on { color: var(--sun); display: inline-block; }
+.stars-bar .stars .on.pop { animation: star-pop .5s cubic-bezier(.2, 2.4, .4, 1); }
+@keyframes star-pop { 0% { transform: scale(.2) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
+.praise {
+min-height: 26px; margin: 10px 0 0; text-align: center;
+font-weight: 800; color: #c47b2d; font-size: 16px;
+}
+.confetti-piece {
+position: fixed; top: -12px; z-index: 50; pointer-events: none;
+border-radius: 2px;
+animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+to { transform: translateY(105vh) rotate(720deg); opacity: .9; }
+}
+.day-card.now { border-color: var(--lake); box-shadow: 0 0 0 3px var(--lake-soft);}
+.day-card.done { background: #fbfaf5;}
+.day-head {
+display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+margin-bottom: 8px;
+}
+.day-name { font-weight: 800; font-size: 17px;}
+.day-name.now-badge {
+font-size: 11px; font-weight: 700; color: #fff; background: var(--lake);
+border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: 2px;
+}
+.day-time { color: var(--lake-dark); font-weight: 700; font-size: 14px; white-space: nowrap;}
+.day-card input[type="text"],.day-card textarea {
+width: 100%; font: inherit;
+border: 1px solid var(--line); border-radius: 10px;
+background: #fffaf0; color: var(--ink);
+padding: 10px 12px; outline: none;
+}
+.day-card textarea {
+margin-top: 8px; min-height: 40px; font-size: 14px; resize: vertical;
+background: #fff; color: var(--muted);
+}
+.day-card input:focus,.day-card textarea:focus {
+border-color: var(--lake); background: #fff;
+box-shadow: 0 0 0 3px var(--lake-soft);
+}
+.done-row { margin-top: 10px; display: flex; justify-content: flex-end;}
+.done-btn {
+border: 1px solid var(--line); background: #fff; color: var(--muted);
+border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 13px; font-weight: 700;
+cursor: pointer; min-height: 36px;
+}
+.day-card.done.done-btn { background: var(--lake-soft); color: var(--lake-dark); border-color: var(--lake);}
+.day-card.done.day-name { color: var(--muted);}
+
+.sleep-note {
+margin-top: 14px; text-align: center; color: var(--muted); font-size: 14px;
+}
+.sleep-note strong { color: var(--lake-dark);}
+.creed {
+margin-top: 18px; padding: 14px 16px;
+border-radius: var(--radius);
+background: var(--lake-soft); color: var(--lake-dark);
+font-size: 15px; text-align: center; font-weight: 700;
+}
+.actions { margin-top: 18px;}
+.actions button {
+width: 100%; min-height: 52px; border: 0; border-radius: 12px;
+background: var(--lake); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+}
+.actions button:active { background: var(--lake-dark);}
+.message { min-height: 22px; text-align: center; color: var(--muted); font-size: 14px; margin: 8px 0 0;}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>ハルログ</h1>
-      <p class="subtitle">いまなにしてる？</p>
-      <div class="today" id="todayText" aria-live="polite"></div>
-    </header>
+<div class="app">
+<header>
+<h1>ハルログ</h1>
+<p class="subtitle">今日は、3日（か4日）ある。</p>
+<div class="today" id="todayText"></div>
+</header>
 
-    <main>
-      <section id="yesterdaySection" hidden aria-labelledby="yesterdayTitle">
-        <details class="review-card" id="yesterdayReview">
-          <summary>
-            <span class="summary-main">
-              <span id="yesterdayTitle">昨日どうだった？</span>
-              <span class="summary-date" id="yesterdayDateText"></span>
-            </span>
-            <span class="summary-status" id="reviewStatus">30秒で振り返り</span>
-          </summary>
+<main>
+<div class="wake-card">
+<div class="wake-row">
+<label for="wake">起きた時間</label>
+<input id="wake" type="time" value="08:00">
+</div>
+<div class="slow-zone">
+<div class="moon">☕</div>
+<div>
+<span id="slowText">8:00〜9:00 は ゆっくりゾーン</span>
+<small>起きて1時間はがんばらない。ここで燃え尽きないための時間。</small>
+</div>
+</div>
+</div>
 
-          <div class="review-body">
-            <div class="previous-plan">
-              <p class="previous-plan-title">昨日の予定</p>
-              <div id="previousPlanContent"></div>
-            </div>
+<div class="mode-switch" role="group" aria-label="一日の分け方">
+<button id="mode4" type="button">4日に分ける<small>4 / 4 / 4 / 4 時間</small></button>
+<button id="mode3" type="button">3日に分ける<small>6 / 5 / 5 時間</small></button>
+</div>
 
-            <fieldset>
-              <legend>進み具合</legend>
-              <div class="choice-grid">
-                <label class="choice">
-                  <input type="radio" name="reviewResult" value="予定どおり">
-                  <span>予定どおり</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewResult" value="少し進んだ">
-                  <span>少し進んだ</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewResult" value="ほぼ進まず">
-                  <span>ほぼ進まず</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewResult" value="休んだ">
-                  <span>休んだ</span>
-                </label>
-              </div>
-            </fieldset>
+<div class="stars-bar"><span>今日のごほうび</span><span class="stars" id="stars"></span><span id="starsText"></span></div>
 
-            <fieldset>
-              <legend>作業時間</legend>
-              <div class="choice-grid">
-                <label class="choice">
-                  <input type="radio" name="reviewDuration" value="〜2h">
-                  <span>〜2h</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewDuration" value="2〜4h">
-                  <span>2〜4h</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewDuration" value="4〜6h">
-                  <span>4〜6h</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewDuration" value="6〜8h">
-                  <span>6〜8h</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="reviewDuration" value="8h〜">
-                  <span>8h〜</span>
-                </label>
-              </div>
-            </fieldset>
+<div class="day-list" id="dayList"></div>
+<p class="praise" id="praise" aria-live="polite"></p>
 
-            <label class="review-note">
-              ひとこと <span class="detail-hint">任意</span>
-              <input id="reviewNote" type="text" autocomplete="off" placeholder="例：ここまで進んだ／資料探しで詰まった">
-            </label>
+<p class="sleep-note" id="sleepNote"></p>
 
-            <div class="review-actions">
-              <button id="completeReviewButton" type="button">昨日を記録して今日へ</button>
-              <button class="secondary-button" id="skipReviewButton" type="button">今日はスキップ</button>
-            </div>
-          </div>
-        </details>
-      </section>
+<div class="creed">ひとつの「日」がダメでも大丈夫。<br>今日はまだ、あと何日もある。</div>
 
-      <section aria-labelledby="scheduleTitle">
-        <details class="schedule-details" id="scheduleDetails">
-          <summary>
-            <span class="summary-main">
-              <span id="scheduleTitle">スケジュールの材料</span>
-              <span class="summary-date">やりたい・やる必要・動かせない予定</span>
-            </span>
-            <span class="detail-hint">日をまたいで保存</span>
-          </summary>
+<div class="actions">
+<button id="copyButton" type="button">今日のログをコピー</button>
+<p class="message" id="message" aria-live="polite"></p>
+</div>
+</main>
+</div>
 
-          <div class="schedule-body">
-            <p class="schedule-note">材料だけ置けば大丈夫。仮スケジュールは、相談したあとに入れます。</p>
+<script>
+(() => {
+const PATTERNS = { 4: [4, 4, 4, 4], 3: [6, 5, 5]};
+const today = new Date();
+const pad = (n) => String(n).padStart(2, "0");
+const dateKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+const storageKey = `halulog-v2:${dateKey}`;
+const todayLabel = `${today.getFullYear()}/${pad(today.getMonth() + 1)}/${pad(today.getDate())}`;
 
-            <label>
-              やりたいこと
-              <textarea id="scheduleWants" placeholder="例：個人作品を進める／絵の研究／片付け／行きたい場所"></textarea>
-            </label>
+const wakeInput = document.getElementById("wake");
+const slowText = document.getElementById("slowText");
+const dayList = document.getElementById("dayList");
+const sleepNote = document.getElementById("sleepNote");
+const message = document.getElementById("message");
+const modeButtons = { 4: document.getElementById("mode4"), 3: document.getElementById("mode3")};
 
-            <label>
-              やらなければいけないこと（締め切り含む）
-              <textarea id="scheduleMusts" placeholder="例：○/○ 原稿提出／デザイン修正／返信"></textarea>
-            </label>
+const praiseEl = document.getElementById("praise");
+const starsEl = document.getElementById("stars");
+const starsTextEl = document.getElementById("starsText");
+const PRAISES = ["えらい！この日、クリア！", "おつかれさま、はる。この日は勝ち。", "よくやった！ごほうび受け取って。", "この日、制覇。次の日ものんびり行こう。", "できた！それで十分すぎるくらい。"];
+let lastCelebrated = -1;
 
-            <label>
-              予定と休み
-              <textarea id="scheduleFixed" placeholder="例：毎週○曜は休み／○/○ 打ち合わせ／外出翌日は回復日"></textarea>
-            </label>
+function confetti() {
+  const colors = ["#5f8f87", "#e9b872", "#d98a94", "#a8c8e0", "#f2d38a"];
+  for (let k = 0; k < 22; k++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    const size = 6 + Math.random() * 7;
+    piece.style.width = size + "px";
+    piece.style.height = size * (Math.random() > 0.5 ? 1 : 0.45) + "px";
+    piece.style.left = Math.random() * 100 + "vw";
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = 1.6 + Math.random() * 1.4 + "s";
+    piece.style.animationDelay = Math.random() * 0.25 + "s";
+    document.body.append(piece);
+    window.setTimeout(() => piece.remove(), 3600);
+  }
+}
 
-            <label>
-              相談して決めた仮スケジュール <span class="detail-hint">相談結果</span>
-              <textarea id="scheduleDraft" placeholder="ここは、材料とその日の状態を見ながら決めた予定を入れます"></textarea>
-            </label>
-          </div>
-        </details>
-      </section>
+function celebrate(index, total) {
+  const doneCount = PATTERNS[state.mode].filter((_, j) => state.blocks[j] && state.blocks[j].done).length;
+  if (doneCount >= total) {
+    praiseEl.textContent = "全部の「日」が終わった！今日は完全勝利。ゆっくり休んで。";
+    confetti();
+    window.setTimeout(confetti, 350);
+  } else {
+    praiseEl.textContent = PRAISES[Math.floor(Math.random() * PRAISES.length)];
+    confetti();
+  }
+  lastCelebrated = index;
+}
 
-      <section id="todayStart" aria-labelledby="dayTitle">
-        <h2 class="section-title" id="dayTitle">今日の入り口</h2>
-        <div class="field-group">
-          <label>
-            起床
-            <input id="wake" type="text" autocomplete="off" placeholder="例：8:20">
-          </label>
-          <label>
-            ボディバッテリー
-            <input id="battery" type="text" inputmode="numeric" autocomplete="off" placeholder="例：42">
-          </label>
-          <label>
-            今日の予定
-            <textarea id="plan" placeholder="今日ありそうなことを軽く"></textarea>
-          </label>
-        </div>
-      </section>
+function renderStars(justLit) {
+  const pattern = PATTERNS[state.mode];
+  starsEl.replaceChildren();
+  let doneCount = 0;
+  pattern.forEach((_, j) => {
+    const on = state.blocks[j] && state.blocks[j].done;
+    if (on) doneCount++;
+    const star = document.createElement("span");
+    star.textContent = "★";
+    if (on) {
+      star.className = "on" + (j === justLit ? " pop" : "");
+    }
+    starsEl.append(star);
+  });
+  starsTextEl.textContent = doneCount === 0 ? "星はこれから" : doneCount >= pattern.length ? "今日は満点！" : `${doneCount}つ点灯`;
+}
 
-      <section aria-labelledby="dayPlanTitle">
-        <h2 class="section-title" id="dayPlanTitle">4つの小さな一日</h2>
-        <p class="section-note">8:00開始。18:00で仕事を終了してお風呂、22:00で一日を閉じる。ひと区画うまくいかなくても、次から再開。</p>
-        <div class="day-list" id="dayList"></div>
-      </section>
+document.getElementById("todayText").textContent = `今日：${todayLabel}`;
 
-      <section aria-labelledby="logTitle">
-        <details class="hour-details">
-          <summary>
-            <span id="logTitle">1時間ごとの観察メモ</span>
-            <span class="detail-hint">必要な日だけ</span>
-          </summary>
-          <div class="hour-list" id="hourList"></div>
-        </details>
-      </section>
+let state = load() || { wake: "08:00", mode: 4, blocks: {}};
 
-      <div class="actions">
-        <button id="copyButton" type="button">ログをコピー</button>
-        <p class="message" id="message" aria-live="polite"></p>
-      </div>
-    </main>
-  </div>
+function load() {
+try { return JSON.parse(localStorage.getItem(storageKey));} catch (e) { return null;}
+}
+function save() {
+try { localStorage.setItem(storageKey, JSON.stringify(state)); showMessage("保存しました", 900);}
+catch (e) { showMessage("保存できませんでした");}
+}
 
-  <script src="app.js"></script>
+function toMin(hhmm) { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m;}
+function toHHMM(min) { const t = ((min % 1440) + 1440) % 1440; return `${pad(Math.floor(t / 60))}:${pad(t % 60)}`;}
+
+function render() {
+const wakeMin = toMin(state.wake || "08:00");
+wakeInput.value = state.wake || "08:00";
+slowText.textContent = `${toHHMM(wakeMin)}〜${toHHMM(wakeMin + 60)} は ゆっくりゾーン`;
+
+Object.entries(modeButtons).forEach(([m, btn]) => {
+btn.classList.toggle("active", Number(m) === Number(state.mode));
+});
+
+const pattern = PATTERNS[state.mode];
+const now = new Date();
+const nowMin = now.getHours() * 60 + now.getMinutes();
+let cursor = wakeMin + 60;
+
+dayList.replaceChildren();
+pattern.forEach((hoursLen, i) => {
+const start = cursor, end = cursor + hoursLen * 60;
+cursor = end;
+const saved = state.blocks[i] || {};
+
+const card = document.createElement("div");
+card.className = "day-card" + (saved.done? " done": "");
+const isNow = nowMin >= start && nowMin < end;
+if (isNow) card.classList.add("now");
+
+const head = document.createElement("div");
+head.className = "day-head";
+const name = document.createElement("div");
+name.className = "day-name";
+name.textContent = `第${i + 1}日`;
+if (isNow) {
+const badge = document.createElement("span");
+badge.className = "now-badge";
+badge.textContent = "いまここ";
+name.append(badge);
+}
+const time = document.createElement("div");
+time.className = "day-time";
+time.textContent = `${toHHMM(start)}〜${toHHMM(end)}`;
+head.append(name, time);
+
+const plan = document.createElement("input");
+plan.type = "text";
+plan.placeholder = "この「日」にやることをひとつ";
+plan.value = saved.plan || "";
+plan.setAttribute("aria-label", `第${i + 1}日の予定`);
+plan.addEventListener("input", () => {
+state.blocks[i] = {...(state.blocks[i] || {}), plan: plan.value};
+save();
+});
+
+const memo = document.createElement("textarea");
+memo.placeholder = "やったことメモ（任意）";
+memo.value = saved.memo || "";
+memo.setAttribute("aria-label", `第${i + 1}日のメモ`);
+memo.addEventListener("input", () => {
+state.blocks[i] = {...(state.blocks[i] || {}), memo: memo.value};
+save();
+});
+
+const doneRow = document.createElement("div");
+doneRow.className = "done-row";
+const doneBtn = document.createElement("button");
+doneBtn.type = "button";
+doneBtn.className = "done-btn";
+doneBtn.textContent = saved.done? "✓ この日はおわり": "この日をおわる";
+doneBtn.addEventListener("click", () => {
+const turningOn = !saved.done;
+state.blocks[i] = {...(state.blocks[i] || {}), done: turningOn};
+if (turningOn) lastCelebrated = i;
+save(); render();
+if (turningOn) {
+celebrate(i, PATTERNS[state.mode].length);
+const cardEl = dayList.children[i];
+const stampEl = cardEl && cardEl.querySelector(".stamp");
+if (stampEl && stampEl.animate) {
+stampEl.animate([
+{ transform: "rotate(-32deg) scale(2.4)", opacity: 0 },
+{ transform: "rotate(-12deg) scale(0.92)", opacity: 1, offset: 0.6 },
+{ transform: "rotate(-12deg) scale(1)", opacity: 1 }
+], { duration: 450, easing: "cubic-bezier(.2,2.2,.4,1)" });
+}
+const starEl = starsEl.children[i];
+if (starEl && starEl.animate) {
+starEl.animate([
+{ transform: "scale(0.2) rotate(-40deg)" },
+{ transform: "scale(1.5) rotate(10deg)", offset: 0.55 },
+{ transform: "scale(1) rotate(0deg)" }
+], { duration: 500, easing: "ease-out" });
+}
+} else {
+lastCelebrated = -1;
+praiseEl.textContent = "";
+}
+});
+doneRow.append(doneBtn);
+
+const stamp = document.createElement("div");
+stamp.className = "stamp" + (saved.done && lastCelebrated === i ? " pop" : "");
+stamp.innerHTML = "よく<br>できた";
+card.append(head, plan, memo, doneRow, stamp);
+dayList.append(card);
+});
+
+sleepNote.innerHTML = `最後の「日」は <strong>${toHHMM(cursor)}</strong> まで。7時間寝るなら、このへんで一日を閉じよう。`;
+renderStars(lastCelebrated);
+}
+
+wakeInput.addEventListener("change", () => {
+state.wake = wakeInput.value || "08:00";
+save(); render();
+});
+Object.entries(modeButtons).forEach(([m, btn]) => {
+btn.addEventListener("click", () => { state.mode = Number(m); save(); render();});
+});
+
+document.getElementById("copyButton").addEventListener("click", async () => {
+const pattern = PATTERNS[state.mode];
+const wakeMin = toMin(state.wake || "08:00");
+let cursor = wakeMin + 60;
+const lines = ["", `今日：${todayLabel}`, `起床：${state.wake}`, `分け方：${pattern.join("/")}時間`, ""];
+pattern.forEach((len, i) => {
+const start = cursor, end = cursor + len * 60; cursor = end;
+const b = state.blocks[i] || {};
+lines.push(`第${i + 1}日 ${toHHMM(start)}〜${toHHMM(end)}　${b.plan || ""}${b.done? "（おわり）": ""}`);
+if (b.memo) lines.push(`　メモ：${b.memo}`);
+});
+try {
+await navigator.clipboard.writeText(lines.join("\n"));
+showMessage("コピーしました");
+} catch (e) {
+showMessage("コピーできませんでした");
+}
+});
+
+let msgTimer;
+function showMessage(text, duration = 1800) {
+message.textContent = text;
+window.clearTimeout(msgTimer);
+msgTimer = window.setTimeout(() => { message.textContent = "";}, duration);
+}
+
+render();
+window.setInterval(render, 60000);
+})();
+</script>
 </body>
 </html>
